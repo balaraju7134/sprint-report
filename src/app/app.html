@@ -1,2 +1,121 @@
-<div class="px-4 py-4 bg-slate-100 text-center font-semibold text-slate-800">Sprint Report</div>
-<router-outlet />
+<div class="bg-slate-100 p-4 text-center text-2xl font-bold">
+ Sprint Report
+</div>
+
+<div class="p-6 space-y-8">
+
+ <!-- Work Items -->
+ <section class="bg-white rounded-lg shadow border p-6">
+
+  <h2 class="text-xl font-semibold mb-4">
+   Work Items File
+  </h2>
+
+  <input type="file" accept=".xlsx,.xls" (change)="onWorkItemFileSelected($event)" class="block w-full text-sm
+             file:bg-blue-600 file:text-white
+             file:border-0 file:px-4 file:py-2
+             file:rounded-md" />
+
+  @if (workItemsFile()) {
+  <div class="mt-4 rounded bg-blue-50 border border-blue-200 p-3">
+   <p class="text-sm text-slate-700">
+    <span class="font-semibold">Selected File:</span>
+    {{ workItemsFile()?.name }}
+   </p>
+  </div>
+  }
+
+ </section>
+
+ <!-- Status Timeline -->
+ <section class="bg-white rounded-lg shadow border p-6">
+
+  <h2 class="text-xl font-semibold mb-4">
+   Item Status Timeline Files
+  </h2>
+
+  <input multiple type="file" accept=".xlsx,.xls" (change)="onStatusFilesSelected($event)" class="block w-full text-sm
+             file:bg-green-600 file:text-white
+             file:border-0 file:px-4 file:py-2
+             file:rounded-md" />
+
+  @if (itemStatusFiles().length) {
+
+  <div class="mt-4 rounded bg-green-50 border border-green-200 p-3">
+
+   <p class="font-semibold mb-2">
+    Selected Files
+   </p>
+
+   <ul class="list-disc ml-5 space-y-1">
+
+    @for (file of itemStatusFiles(); track file.name) {
+    <li>{{ file.name }}</li>
+    }
+
+   </ul>
+
+  </div>
+
+  }
+
+ </section>
+
+ <!-- Generate -->
+ <div class="flex justify-center">
+
+  <button (click)="generateReport()" [disabled]="!workItemsFile() || !itemStatusFiles().length" class="px-8 py-3 rounded-lg bg-indigo-600 text-white font-medium
+             hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
+
+   Generate Report
+
+  </button>
+
+ </div>
+
+
+ <div class="overflow-auto mt-8">
+
+  <table class="min-w-full border border-gray-300">
+
+   <thead class="bg-slate-200">
+
+    <tr>
+
+     @for(column of tableColumns; track column.key){
+
+     <th class="border px-3 py-2 text-left">
+      {{ column.label }}
+     </th>
+
+     }
+
+    </tr>
+
+   </thead>
+
+   <tbody>
+
+    @for(item of tableData(); track item.ticketNo){
+
+    <tr>
+
+     @for(column of tableColumns; track column.key){
+
+     <td class="border px-3 py-2">
+      {{ item[column.key] }}
+     </td>
+
+     }
+
+    </tr>
+
+    }
+
+   </tbody>
+
+  </table>
+
+ </div>
+
+</div>
