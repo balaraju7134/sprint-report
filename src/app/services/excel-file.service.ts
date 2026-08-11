@@ -3,7 +3,7 @@ import * as XLSX from 'xlsx';
 import { TableColumn } from '../model/table.model';
 
 @Injectable({ providedIn: 'root' })
-export class ExcelService {
+export class ExcelFileService {
 
  /**
   * Converts the first sheet of an Excel file to JSON.
