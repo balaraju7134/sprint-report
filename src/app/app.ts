@@ -68,6 +68,10 @@ export class App {
 
   return result
  }
+
+ exportToExcel(): void {
+  this.excelService.exportToExcel<TableData>(this.tableData(), this.tableColumns)
+ }
 }
 
 

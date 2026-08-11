@@ -63,14 +63,10 @@
 
  <!-- Generate -->
  <div class="flex justify-center">
-
-  <button (click)="generateReport()" [disabled]="!workItemsFile() || !itemStatusFiles().length" class="px-8 py-3 rounded-lg bg-indigo-600 text-white font-medium
-             hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
-
+  <button (click)="generateReport()" [disabled]="!workItemsFile() || !itemStatusFiles().length"
+   class="px-8 py-3 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
    Generate Report
-
   </button>
-
  </div>
 
 
@@ -117,5 +113,15 @@
   </table>
 
  </div>
+
+ @if (tableData().length) {
+ <!-- Export to Excel -->
+ <div class="flex justify-center">
+  <button (click)="exportToExcel()"
+   class="px-8 py-3 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
+   Export to Excel
+  </button>
+ </div>
+ }
 
 </div>
