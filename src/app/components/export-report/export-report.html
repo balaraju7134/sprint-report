@@ -1,0 +1,450 @@
+<!-- Page Header -->
+<header class="border-b border-slate-200 bg-white">
+ <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+   <!-- Title -->
+   <div class="flex items-center gap-3">
+
+    <div
+     class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-sm font-bold text-white shadow-sm">
+     E
+    </div>
+
+    <div>
+     <h1 class="text-2xl font-bold tracking-tight text-slate-900">
+      Export Sprint Reports
+     </h1>
+
+     <p class="mt-1 text-sm text-slate-500">
+      Select teams to export into one Excel workbook.
+     </p>
+    </div>
+
+   </div>
+
+   <!-- Available Reports -->
+   <div
+    class="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-600">
+
+    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+
+    {{ availableTeams().length }}
+
+    {{ availableTeams().length === 1 ? 'report' : 'reports' }}
+
+    available
+   </div>
+
+  </div>
+
+ </div>
+</header>
+
+
+<!-- Main -->
+<main class="min-h-[calc(100vh-105px)] bg-slate-50">
+
+ <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+
+  @if (availableTeams().length) {
+
+  <!-- Selection Toolbar -->
+  <section class="mb-5 rounded-xl border border-slate-200 bg-white shadow-sm">
+
+   <div class="flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+
+    <!-- Selection -->
+    <div class="flex items-center gap-3">
+
+     <input type="checkbox" [checked]="allSelected()" [indeterminate]="partiallySelected()" (change)="toggleSelectAll()"
+      aria-label="Select all teams" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
+
+     <button type="button" (click)="toggleSelectAll()"
+      class="text-sm font-semibold text-slate-800 hover:text-indigo-600">
+
+      @if (allSelected()) {
+      All teams selected
+      } @else {
+      Select all teams
+      }
+
+     </button>
+
+     <span class="text-xs text-slate-400">
+      {{ selectedCount() }} / {{ availableTeams().length }}
+     </span>
+
+    </div>
+
+
+    <!-- Actions -->
+    <div class="flex items-center gap-2">
+
+     @if (selectedCount()) {
+
+     <div
+      class="hidden items-center gap-2 rounded-lg bg-indigo-50 px-3 py-2 text-xs font-medium text-indigo-700 sm:flex">
+
+      <span>
+       {{ selectedCount() }}
+       {{ selectedCount() === 1 ? 'team' : 'teams' }}
+      </span>
+
+      <span class="text-indigo-300">
+       •
+      </span>
+
+      <span>
+       {{ selectedRowCount() }}
+       {{ selectedRowCount() === 1 ? 'record' : 'records' }}
+      </span>
+
+     </div>
+
+     <button type="button" (click)="clearSelection()"
+      class="rounded-lg px-3 py-2 text-xs font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-700">
+
+      Clear
+
+     </button>
+
+     }
+
+     <button type="button" (click)="exportSelected()" [disabled]="!selectedCount()"
+      class="inline-flex h-9 items-center gap-2 rounded-lg bg-indigo-600 px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300">
+
+      <!-- Download icon -->
+      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+
+       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" />
+
+      </svg>
+
+      <span>
+       Export
+       @if (selectedCount()) {
+       {{ selectedCount() }}
+       {{ selectedCount() === 1 ? 'Report' : 'Reports' }}
+       } @else {
+       Reports
+       }
+      </span>
+
+     </button>
+
+    </div>
+
+   </div>
+
+
+   <!-- Export explanation -->
+   @if (selectedCount()) {
+
+   <div class="border-t border-slate-100 bg-slate-50/70 px-4 py-3 sm:px-5">
+
+    <div class="flex items-start gap-3">
+
+     <div
+      class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-indigo-600 ring-1 ring-slate-200">
+
+      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a2 2 0 01.293.707V19a2 2 0 01-2 2z" />
+
+      </svg>
+
+     </div>
+
+     <div>
+
+      <p class="text-xs font-semibold text-slate-700">
+       One Excel workbook
+      </p>
+
+      <p class="mt-0.5 text-xs text-slate-500">
+       {{ selectedCount() }}
+       {{ selectedCount() === 1 ? 'team will' : 'teams will' }}
+       be exported as separate worksheet tabs with
+       {{ selectedRowCount() }}
+       {{ selectedRowCount() === 1 ? 'record' : 'records' }}.
+      </p>
+
+     </div>
+
+    </div>
+
+   </div>
+
+   }
+
+  </section>
+
+
+  <!-- Reports -->
+  <div class="space-y-3">
+
+   @for (
+   team of availableTeams();
+   track team.id
+   ) {
+
+   <section class="overflow-hidden rounded-xl border bg-white shadow-sm transition-all duration-200"
+    [class.border-indigo-300]="isSelected(team.id)" [class.bg-indigo-50]="isSelected(team.id)"
+    [class.border-slate-200]="!isSelected(team.id)" [class.shadow-md]="isExpanded(team.id)">
+
+    <!-- Team Card -->
+    <div class="flex items-center gap-4 px-4 py-4 sm:px-5">
+
+     <!-- Checkbox -->
+     <input type="checkbox" [checked]="isSelected(team.id)" (change)="toggleTeam(team.id)"
+      [attr.aria-label]="'Select ' + team.name"
+      class="h-4 w-4 shrink-0 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
+
+
+     <!-- Avatar -->
+     <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold"
+      [class]="team.avatarClass">
+
+      {{ team.name | teamInitials }}
+
+     </div>
+
+
+     <!-- Team Info -->
+     <div class="min-w-0 flex-1">
+
+      <div class="flex items-center gap-2">
+
+       <h2 class="truncate text-sm font-semibold text-slate-900">
+        {{ team.name }}
+       </h2>
+
+       @if (isSelected(team.id)) {
+
+       <span
+        class="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-indigo-700">
+
+        Selected
+
+       </span>
+
+       }
+
+      </div>
+
+
+      <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+
+       <span>
+        {{ getTableData(team.id).length }}
+        {{ getTableData(team.id).length === 1 ? 'record' : 'records' }}
+       </span>
+
+       @if (
+       getTeamData(team.id)?.uploadedAt;
+       as uploadedAt
+       ) {
+
+       <span class="text-slate-300">
+        •
+       </span>
+
+       <span>
+        Uploaded {{ uploadedAt | date:'medium' }}
+       </span>
+
+       }
+
+      </div>
+
+     </div>
+
+
+     <!-- Preview -->
+     <button type="button" (click)="toggleExpanded(team.id)"
+      class="inline-flex h-8 shrink-0 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-300">
+
+      <svg class="h-4 w-4 transition-transform duration-200" [class.rotate-180]="isExpanded(team.id)"
+       viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+
+       <path fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.06a.75.75 0 111.12 1.0l-4.25 4.65a.75.75 0 01-1.08 0L5.21 8.29a.75.75 0 01.02-1.08z"
+        clip-rule="evenodd" />
+
+      </svg>
+
+      {{ isExpanded(team.id) ? 'Hide' : 'Preview' }}
+
+     </button>
+
+    </div>
+
+
+    <!-- Preview -->
+    @if (isExpanded(team.id)) {
+
+    <div class="border-t border-slate-100 bg-slate-50/70 p-4 sm:p-5">
+
+     <!-- Preview Header -->
+     <div class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+      <div>
+
+       <h3 class="text-sm font-semibold text-slate-800">
+        {{ team.name }} Report
+       </h3>
+
+       <p class="mt-0.5 text-xs text-slate-500">
+        Select individual records if you only want to export part of this report.
+       </p>
+
+      </div>
+
+      <div class="flex items-center gap-2">
+
+       <span class="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">
+
+        {{ getTableData(team.id).length }}
+        rows
+
+       </span>
+
+       @if (rt.selectedCount()) {
+
+       <span class="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700">
+
+        {{ rt.selectedCount() }}
+        selected
+
+       </span>
+
+       }
+
+       <button type="button" (click)="exportSelectedFromTable(team.id, rt.selectedData())"
+        [disabled]="!rt.selectedCount()"
+        class="inline-flex h-8 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40">
+
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" />
+
+        </svg>
+
+        Export Selected
+
+       </button>
+
+      </div>
+
+     </div>
+
+
+     <app-report-table #rt [tableData]="getTableData(team.id)">
+     </app-report-table>
+
+    </div>
+
+    }
+
+   </section>
+
+   }
+
+  </div>
+
+
+  <!-- Sticky Export Bar -->
+  @if (selectedCount()) {
+
+  <div class="sticky bottom-4 z-20 mt-6 rounded-xl border border-indigo-200 bg-white/95 p-4 shadow-lg backdrop-blur">
+
+   <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+    <div>
+
+     <div class="flex items-center gap-2">
+
+      <div class="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
+
+       <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+
+       </svg>
+
+      </div>
+
+      <p class="text-sm font-semibold text-slate-900">
+       Ready to export
+      </p>
+
+     </div>
+
+     <p class="mt-1 text-xs text-slate-500">
+      {{ selectedCount() }}
+      {{ selectedCount() === 1 ? 'team' : 'teams' }}
+
+      ·
+
+      {{ selectedRowCount() }}
+      {{ selectedRowCount() === 1 ? 'record' : 'records' }}
+     </p>
+
+    </div>
+
+
+    <button type="button" (click)="exportSelected()"
+     class="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+
+     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" />
+
+     </svg>
+
+     Export
+     {{ selectedCount() }}
+     {{ selectedCount() === 1 ? 'Team Report' : 'Team Reports' }}
+
+    </button>
+
+   </div>
+
+  </div>
+
+  }
+
+  } @else {
+
+  <!-- Empty State -->
+  <section class="rounded-xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
+
+   <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+
+    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+      d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a2 2 0 01.293.707V19a2 2 0 01-2-2z" />
+
+    </svg>
+
+   </div>
+
+   <h2 class="mt-4 text-sm font-semibold text-slate-900">
+    No reports available
+   </h2>
+
+   <p class="mx-auto mt-1 max-w-md text-sm text-slate-500">
+    Generate a sprint report for at least one team before exporting reports.
+   </p>
+
+  </section>
+
+  }
+
+ </div>
+
+</main>
