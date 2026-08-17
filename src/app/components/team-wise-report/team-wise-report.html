@@ -283,7 +283,8 @@
  <!-- ========================= -->
 
  @if (tableData().length) {
- <app-report-table [tableData]="tableData()" />
+ <app-report-table [tableData]="tableData()" [selectedIds]="selectedIds()"
+  (selectedIdsChange)="onRowsSelected($event)" />
  }
 
 </main>

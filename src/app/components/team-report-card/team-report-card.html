@@ -1,0 +1,142 @@
+<section class="overflow-hidden rounded-xl border bg-white
+         shadow-sm transition" [class.border-indigo-300]="selected()" [class.border-slate-200]="!selected()"
+ [class.shadow-md]="expanded()">
+
+ <!-- Team summary -->
+ <div class="flex items-center gap-4 px-4 py-4
+           sm:px-5">
+
+  <!-- Selection -->
+  <input type="checkbox" [checked]="selected()" (change)="toggleTeam()" [attr.aria-label]="'Select ' + team().name"
+   class="h-4 w-4 shrink-0 rounded
+             border-slate-300
+             text-indigo-600
+             focus:ring-indigo-500" />
+
+
+  <!-- Avatar -->
+  <div class="flex h-10 w-10 shrink-0
+             items-center justify-center
+             rounded-full text-sm font-bold" [class]="team().avatarClass">
+   {{ team().name | teamInitials }}
+  </div>
+
+
+  <!-- Information -->
+  <div class="min-w-0 flex-1">
+
+   <div class="flex items-center gap-2">
+
+    <h2 class="truncate text-sm
+                 font-semibold text-slate-900">
+     {{ team().name }}
+    </h2>
+
+    @if (selected()) {
+
+    <span class="rounded-full bg-indigo-50
+                   px-2 py-0.5 text-[10px]
+                   font-semibold text-indigo-700">
+     Selected
+    </span>
+
+    }
+
+   </div>
+
+   <div class="mt-1 flex flex-wrap
+               items-center gap-2
+               text-xs text-slate-500">
+
+    <span>
+     {{ tableData().length }}
+     {{ tableData().length === 1
+     ? 'record'
+     : 'records'
+     }}
+    </span>
+
+    <span class="text-slate-300">•</span>
+
+    <span>
+     Uploaded
+     {{ teamData().uploadedAt | date:'mediumDate' }}
+    </span>
+
+   </div>
+
+  </div>
+
+
+  <!-- Preview -->
+  <button type="button" (click)="toggleExpanded()" class="inline-flex h-8 shrink-0
+             items-center gap-2 rounded-lg
+             border border-slate-200
+             bg-white px-3 text-xs
+             font-semibold text-slate-600
+             transition hover:bg-slate-50
+             focus:outline-none
+             focus:ring-2
+             focus:ring-indigo-500">
+
+   <svg class="h-4 w-4 transition-transform" [class.rotate-180]="expanded()" viewBox="0 0 20 20" fill="currentColor">
+    <path fill-rule="evenodd"
+     d="M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.06a.75.75 0 111.12 1.0l-4.25 4.65a.75.75 0 01-1.08 0L5.21 8.29a.75.75 0 01.02-1.08z"
+     clip-rule="evenodd" />
+   </svg>
+
+   {{ expanded() ? 'Hide' : 'Preview' }}
+
+  </button>
+
+ </div>
+
+
+ <!-- Preview -->
+ @if (expanded()) {
+
+ <div class="border-t border-slate-100
+             bg-slate-50/70 p-4 sm:p-5">
+
+  <div class="mb-3 flex flex-col gap-2
+               sm:flex-row sm:items-center
+               sm:justify-between">
+
+   <div>
+
+    <h3 class="text-sm font-semibold
+                   text-slate-800">
+     {{ team().name }} records
+    </h3>
+
+    <p class="mt-0.5 text-xs
+                   text-slate-500">
+     Select specific rows to export only
+     part of this team's report.
+    </p>
+
+   </div>
+
+
+   @if (selectedRows().size) {
+
+   <span class="rounded-full bg-indigo-50
+                   px-2.5 py-1 text-xs
+                   font-semibold text-indigo-700">
+    {{ selectedRows().size }}
+    selected
+   </span>
+
+   }
+
+  </div>
+
+
+  <app-report-table [tableData]="tableData()" [selectedIds]="selectedRows()"
+   (selectedIdsChange)="onRowsSelected($event)" />
+
+ </div>
+
+ }
+
+</section>

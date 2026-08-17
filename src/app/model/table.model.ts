@@ -17,6 +17,7 @@ export interface TableData {
  movedBackStatus: string;
 }
 
+export type ReportSelection = string[]
 
 export interface TableColumn<T = any> {
  key: keyof T;

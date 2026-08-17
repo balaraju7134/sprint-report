@@ -1,137 +1,152 @@
 import {
+ ChangeDetectionStrategy,
  Component,
  computed,
- effect,
  inject,
  input,
- output,
- signal
+ output
 } from '@angular/core';
 
-import {
- TableData
-} from '../../model/table.model';
-
-import {
- SprintReportService
-} from '../../services/report-generation.service';
+import { TableData } from '../../model/table.model';
+import { SprintReportService } from '../../services/report-generation.service';
 
 @Component({
  selector: 'app-report-table',
+ standalone: true,
  imports: [],
- templateUrl: './report-table.html'
+ templateUrl: './report-table.html',
+ changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReportTable {
 
- private readonly sprintReportService =
+ private readonly reportService =
   inject(SprintReportService);
+
+ // ---------------------------------------------------------------------------
+ // Inputs
+ // ---------------------------------------------------------------------------
 
  readonly tableData =
   input.required<TableData[]>();
 
- readonly tableColumns =
-  this.sprintReportService.tableColumns;
-
  /**
-  * Selected ticket numbers.
+  * Row IDs selected by the parent.
+  *
+  * Example:
+  * ['SPR-101', 'SPR-102']
   */
- readonly selectedTicketNos =
-  signal<Set<string>>(
+ readonly selectedIds =
+  input<ReadonlySet<string>>(
    new Set()
   );
 
- /**
-  * Number of selected records.
-  */
+ // ---------------------------------------------------------------------------
+ // Outputs
+ // ---------------------------------------------------------------------------
+
+ readonly selectedIdsChange =
+  output<Set<string>>();
+
+ // ---------------------------------------------------------------------------
+ // Table configuration
+ // ---------------------------------------------------------------------------
+
+ readonly tableColumns =
+  this.reportService.tableColumns;
+
+ // ---------------------------------------------------------------------------
+ // Computed state
+ // ---------------------------------------------------------------------------
+
  readonly selectedCount =
   computed(() =>
-   this.selectedTicketNos().size
+   this.selectedIds().size
   );
 
- /**
-  * Whether all records are selected.
-  */
- readonly allSelected =
-  computed(() => {
-
-   const data =
-    this.tableData();
-
-   if (!data.length) {
-    return false;
-   }
-
-   const selected =
-    this.selectedTicketNos();
-
-   return data.every(item =>
-    selected.has(item.ticketNo)
-   );
-  });
-
- /**
-  * Whether selection is partial.
-  */
- readonly partiallySelected =
-  computed(() => {
-
-   const count =
-    this.selectedCount();
-
-   return (
-    count > 0 &&
-    !this.allSelected()
-   );
-  });
-
- /**
-  * Selected records.
-  */
  readonly selectedData =
   computed(() => {
 
    const selected =
-    this.selectedTicketNos();
+    this.selectedIds();
 
    return this.tableData()
-    .filter(item =>
-     selected.has(item.ticketNo)
+    .filter(row =>
+     selected.has(row.ticketNo)
     );
   });
 
- constructor() {
+ readonly allSelected =
+  computed(() => {
 
-  /**
-   * Clear row selection whenever
-   * the input dataset changes.
-   */
-  effect(() => {
+   const rows =
+    this.tableData();
 
-   this.tableData();
+   if (!rows.length) {
+    return false;
+   }
 
-   this.selectedTicketNos.set(
-    new Set()
+   const selected =
+    this.selectedIds();
+
+   return rows.every(row =>
+    selected.has(row.ticketNo)
    );
   });
- }
+
+ readonly partiallySelected =
+  computed(() => {
+
+   return (
+    this.selectedCount() > 0 &&
+    !this.allSelected()
+   );
+  });
+
+ // ---------------------------------------------------------------------------
+ // Selection
+ // ---------------------------------------------------------------------------
 
  toggleRecord(
   ticketNo: string
  ): void {
 
-  const selected =
-   new Set(
-    this.selectedTicketNos()
-   );
+  const next =
+   new Set(this.selectedIds());
 
-  if (selected.has(ticketNo)) {
-   selected.delete(ticketNo);
+  if (next.has(ticketNo)) {
+   next.delete(ticketNo);
   } else {
-   selected.add(ticketNo);
+   next.add(ticketNo);
   }
 
-  this.selectedTicketNos.set(
-   selected
+  this.emitSelection(next);
+ }
+
+ toggleSelectAll(): void {
+
+  if (this.allSelected()) {
+   this.clearSelection();
+   return;
+  }
+
+  this.selectAll();
+ }
+
+ selectAll(): void {
+
+  const next =
+   new Set(
+    this.tableData()
+     .map(row => row.ticketNo)
+   );
+
+  this.emitSelection(next);
+ }
+
+ clearSelection(): void {
+
+  this.emitSelection(
+   new Set()
   );
  }
 
@@ -139,50 +154,20 @@ export class ReportTable {
   ticketNo: string
  ): boolean {
 
-  return this.selectedTicketNos()
+  return this.selectedIds()
    .has(ticketNo);
  }
 
- toggleSelectAll(): void {
+ // ---------------------------------------------------------------------------
+ // Internal
+ // ---------------------------------------------------------------------------
 
-  if (this.allSelected()) {
-   this.clearSelection();
-  } else {
-   this.selectAll();
-  }
- }
+ private emitSelection(
+  selection: Set<string>
+ ): void {
 
- selectAll(): void {
-
-  this.selectedTicketNos.set(
-   new Set(
-    this.tableData()
-     .map(item =>
-      item.ticketNo
-     )
-   )
+  this.selectedIdsChange.emit(
+   selection
   );
- }
-
- clearSelection(): void {
-
-  this.selectedTicketNos.set(
-   new Set()
-  );
- }
-
- exportToExcel(): void {
-
-  const selected =
-   this.selectedData();
-
-  if (!selected.length) {
-   return;
-  }
-
-  this.sprintReportService
-   .exportToExcel(selected);
-
-  this.clearSelection();
  }
 }

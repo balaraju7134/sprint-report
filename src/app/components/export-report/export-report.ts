@@ -1,13 +1,10 @@
 import {
+ ChangeDetectionStrategy,
  Component,
  computed,
  inject,
  signal
 } from '@angular/core';
-
-import {
- DatePipe
-} from '@angular/common';
 
 import {
  TEAM_LIST,
@@ -19,7 +16,6 @@ import {
 } from '../../model/table.model';
 
 import {
- TeamData,
  TeamDataService
 } from '../../services/team-data.service';
 
@@ -28,281 +24,223 @@ import {
 } from '../../services/report-generation.service';
 
 import {
- TeamInitialsPipe
-} from '../../pipes/team-initials.pipe';
-
-import {
- ReportTable
-} from '../report-table/report-table';
+ TeamReportCard
+} from '../team-report-card/team-report-card';
 
 @Component({
  selector: 'app-export-report',
+ standalone: true,
  imports: [
-  DatePipe,
-  TeamInitialsPipe,
-  ReportTable
+  TeamReportCard
  ],
- templateUrl: './export-report.html'
+ templateUrl: './export-report.html',
+ changeDetection: ChangeDetectionStrategy.OnPush,
+ host: {
+  class: 'flex h-dvh flex-col overflow-hidden'
+ }
 })
 export class ExportReport {
 
  private readonly teamDataService =
   inject(TeamDataService);
 
- private readonly sprintReportService =
+ private readonly reportService =
   inject(SprintReportService);
 
- readonly teamList = TEAM_LIST;
+ // ---------------------------------------------------------------------------
+ // Data
+ // ---------------------------------------------------------------------------
 
- readonly tableColumns =
-  this.sprintReportService.tableColumns;
+ readonly teams = TEAM_LIST;
 
- /**
-  * Selected teams.
-  */
- readonly selectedTeamIds =
-  signal<Set<Team['id']>>(
-   new Set()
-  );
+ readonly availableTeams = computed(() => this.teams.filter(team => this.teamDataService.has(team.id)));
 
- /**
-  * Currently expanded team.
-  */
- readonly expandedTeamId =
-  signal<Team['id'] | null>(null);
+ // ---------------------------------------------------------------------------
+ // Team selection
+ // ---------------------------------------------------------------------------
 
- /**
-  * Teams with generated reports.
-  */
- readonly availableTeams =
-  computed(() =>
-   this.teamList.filter(team =>
-    this.teamDataService.has(team.id)
-   )
-  );
+ readonly selectedTeamIds = signal<Set<Team['id']>>(new Set());
 
- /**
-  * Number of selected teams.
-  */
- readonly selectedCount =
-  computed(() =>
-   this.selectedTeamIds().size
-  );
+ readonly selectedTeams = computed(() => {
+  const selected = this.selectedTeamIds();
+  return this.availableTeams().filter(team => selected.has(team.id));
+ });
 
- /**
-  * Whether all available teams are selected.
-  */
- readonly allSelected =
-  computed(() => {
+ readonly selectedTeamCount = computed(() => this.selectedTeamIds().size);
 
-   const teams =
-    this.availableTeams();
-
-   const selected =
-    this.selectedTeamIds();
-
-   return (
-    teams.length > 0 &&
-    teams.every(team =>
-     selected.has(team.id)
-    )
-   );
-  });
-
- /**
-  * Whether selection is partial.
-  */
- readonly partiallySelected =
-  computed(() => {
-
-   const count =
-    this.selectedCount();
-
-   return (
-    count > 0 &&
-    !this.allSelected()
-   );
-  });
-
- /**
-  * Total rows across selected teams.
-  */
- readonly selectedRowCount =
-  computed(() =>
-   this.availableTeams()
-    .filter(team =>
-     this.selectedTeamIds()
-      .has(team.id)
-    )
-    .reduce(
-     (total, team) =>
-      total +
-      this.getTableData(team.id).length,
-     0
-    )
-  );
-
- /**
-  * Selected team names.
-  */
- readonly selectedTeamNames =
-  computed(() =>
-   this.availableTeams()
-    .filter(team =>
-     this.selectedTeamIds()
-      .has(team.id)
-    )
-    .map(team => team.name)
-  );
-
- toggleTeam(
-  teamId: Team['id']
- ): void {
-
-  const selected =
-   new Set(
-    this.selectedTeamIds()
-   );
-
-  if (selected.has(teamId)) {
-   selected.delete(teamId);
-  } else {
-   selected.add(teamId);
+ readonly allTeamsSelected = computed(() => {
+  const teams = this.availableTeams();
+  if (!teams.length) {
+   return false;
   }
 
-  this.selectedTeamIds.set(
-   selected
-  );
+  const selected = this.selectedTeamIds();
+  return teams.every(team => selected.has(team.id));
+ });
+
+ readonly partiallySelected = computed(() => {
+  const count = this.selectedTeamCount();
+  return (count > 0 && !this.allTeamsSelected());
+ });
+
+ // ---------------------------------------------------------------------------
+ // Row selection
+ // ---------------------------------------------------------------------------
+
+ /**
+  * teamId -> selected ticket numbers
+  */
+ readonly selectedRows = signal<Map<Team['id'], Set<string>>>(new Map());
+
+ readonly selectedRowCount = computed(() => {
+  let count = 0;
+
+  for (const team of this.selectedTeams()) {
+   count += this.getExportRows(team).length;
+  }
+
+  return count;
+ });
+
+ // ---------------------------------------------------------------------------
+ // Expansion
+ // ---------------------------------------------------------------------------
+
+ readonly expandedTeamId = signal<Team['id'] | null>(null);
+
+ // ---------------------------------------------------------------------------
+ // Team selection actions
+ // ---------------------------------------------------------------------------
+
+ toggleTeam(teamId: Team['id']): void {
+
+  const next = new Set(this.selectedTeamIds());
+
+  if (next.has(teamId)) {
+   next.delete(teamId);
+  } else {
+   next.add(teamId);
+  }
+
+  this.selectedTeamIds.set(next);
  }
 
- isSelected(
-  teamId: Team['id']
- ): boolean {
-
-  return this.selectedTeamIds()
-   .has(teamId);
- }
-
- toggleExpanded(
-  teamId: Team['id']
- ): void {
-
-  this.expandedTeamId.update(
-   current =>
-    current === teamId
-     ? null
-     : teamId
-  );
- }
-
- isExpanded(
-  teamId: Team['id']
- ): boolean {
-
-  return (
-   this.expandedTeamId() === teamId
-  );
- }
-
- selectAll(): void {
-
-  this.selectedTeamIds.set(
-   new Set(
-    this.availableTeams()
-     .map(team => team.id)
-   )
-  );
+ selectAllTeams(): void {
+  this.selectedTeamIds.set(new Set(this.availableTeams().map(team => team.id)));
  }
 
  clearSelection(): void {
-
-  this.selectedTeamIds.set(
-   new Set()
-  );
+  this.selectedTeamIds.set(new Set());
+  this.selectedRows.set(new Map());
  }
 
  toggleSelectAll(): void {
-
-  if (this.allSelected()) {
+  if (this.allTeamsSelected()) {
    this.clearSelection();
-  } else {
-   this.selectAll();
-  }
- }
-
- getTableData(
-  teamId: Team['id']
- ): TableData[] {
-
-  return this.teamDataService
-   .getTableData(teamId);
- }
-
- getTeamData(
-  teamId: Team['id']
- ): TeamData | null {
-
-  return this.teamDataService
-   .get(teamId);
- }
-
- /**
-  * Export all selected teams into one
-  * Excel workbook.
-  *
-  * Each team gets its own worksheet.
-  */
- exportSelected(): void {
-
-  const selectedTeams =
-   this.availableTeams()
-    .filter(team =>
-     this.selectedTeamIds()
-      .has(team.id)
-    );
-
-  if (!selectedTeams.length) {
    return;
   }
 
-  this.sprintReportService
+  this.selectAllTeams();
+ }
+
+ // ---------------------------------------------------------------------------
+ // Expansion
+ // ---------------------------------------------------------------------------
+
+ toggleExpanded(teamId: Team['id']): void {
+  this.expandedTeamId.update(current => current === teamId ? null : teamId);
+ }
+
+ // ---------------------------------------------------------------------------
+ // Row selection
+ // ---------------------------------------------------------------------------
+
+ getSelectedRows(teamId: Team['id']): ReadonlySet<string> {
+  return (this.selectedRows().get(teamId) ?? EMPTY_SELECTION);
+ }
+
+ updateSelectedRows(teamId: Team['id'], rows: Set<string>): void {
+  const next = new Map(this.selectedRows());
+
+  if (rows.size) {
+   next.set(teamId, rows);
+
+   // Selecting a row automatically
+   // includes the team in the export.
+   this.addTeamToSelection(teamId);
+  } else {
+   next.delete(teamId);
+  }
+
+  this.selectedRows.set(next);
+ }
+
+ // ---------------------------------------------------------------------------
+ // Data access
+ // ---------------------------------------------------------------------------
+
+ getRows(teamId: Team['id']): TableData[] {
+  return this.teamDataService.getTableData(teamId);
+ }
+
+ getTeamData(teamId: Team['id']) {
+  return this.teamDataService.get(teamId);
+ }
+
+ // ---------------------------------------------------------------------------
+ // Export
+ // ---------------------------------------------------------------------------
+
+ export(): void {
+
+  const teams = this.selectedTeams();
+
+  if (!teams.length) {
+   return;
+  }
+
+  this.reportService
    .exportAllTeamsToExcel(
-    selectedTeams.map(team => ({
+    teams.map(team => ({
      name: team.name,
      tableData:
-      this.getTableData(team.id)
+      this.getExportRows(team)
     }))
    );
  }
 
- /**
-  * Export selected rows from one team's
-  * preview table.
-  */
- exportSelectedFromTable(
-  teamId: Team['id'],
-  selectedData:
-   TableData[] | null | undefined
- ): void {
+ // ---------------------------------------------------------------------------
+ // Helpers
+ // ---------------------------------------------------------------------------
 
-  const team =
-   this.teamList.find(
-    item => item.id === teamId
-   );
-
-  if (!team) {
+ private addTeamToSelection(teamId: Team['id']): void {
+  if (this.selectedTeamIds().has(teamId)) {
    return;
   }
 
-  const data =
-   selectedData?.length
-    ? selectedData
-    : this.getTableData(teamId);
+  const next = new Set(this.selectedTeamIds());
+  next.add(teamId);
+  this.selectedTeamIds.set(next);
+ }
 
-  this.sprintReportService
-   .exportTeamRowsToExcel(
-    team.name,
-    data
-   );
+ private getExportRows(team: Team): TableData[] {
+  const rows = this.getRows(team.id);
+  const selected = this.selectedRows().get(team.id);
+
+  /**
+   * No row-level selection:
+   * export the complete team.
+   */
+  if (!selected?.size) {
+   return rows;
+  }
+
+  /**
+   * Row-level selection:
+   * export only selected rows.
+   */
+  return rows.filter(row => selected.has(row.ticketNo));
  }
 }
+
+const EMPTY_SELECTION: ReadonlySet<string> = new Set();
