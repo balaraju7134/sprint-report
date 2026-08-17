@@ -44,8 +44,7 @@ export function transformWorkItems(workItems: WorkItem[]): TableData[] {
    comments: "",
    developmentStartDate: firstDate(statusMap, StatusNameEnum.IN_PROGRESS),
    estimatedEndDate: item.endDate,
-   actualEndDate:
-    lastDate(statusMap, StatusNameEnum.PROD_DEPLOYMENT) || lastDate(statusMap, StatusNameEnum.COMPLETED),
+   actualEndDate: lastDate(statusMap, StatusNameEnum.PROD_DEPLOYMENT) || lastDate(statusMap, StatusNameEnum.COMPLETED),
    qaDeployedDate: firstDate(statusMap, StatusNameEnum.QA),
    qatStartDate: firstDate(statusMap, StatusNameEnum.QA),
    uatDeployedDate: firstDate(statusMap, StatusNameEnum.UAT),

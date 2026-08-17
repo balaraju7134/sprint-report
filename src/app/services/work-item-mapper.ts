@@ -24,9 +24,7 @@ export function mapExcelToWorkItem(item: ExcelWorkItem): WorkItem {
   sprint: item.Sprint,
   createdBy: item['Created by'],
   createdOn: item['Created On'],
-  assignee: item.Assignee
-   ? item.Assignee.split(',').map(value => value.trim())
-   : [],
+  assignee: item.Assignee ? item.Assignee.split(',').map(value => value.trim()) : [],
   status: item.Status,
   epic: item.Epic,
   itemType: item['Item Type'],
@@ -38,9 +36,7 @@ export function mapExcelToWorkItem(item: ExcelWorkItem): WorkItem {
   estimationPoints: Number(item['Estimation Points'] || 0),
   release: item.Release,
   totalWorkHours: item['Total Workhours'],
-  workHoursPerOwner: item['Work hours per owner']
-   ? item['Work hours per owner'].split(',')
-   : [],
+  workHoursPerOwner: item['Work hours per owner'] ? item['Work hours per owner'].split(',') : [],
   workHoursType: item['Work hours type'],
   parentId: item['Parent Id'],
   sprintType: item['Sprint Type'],
