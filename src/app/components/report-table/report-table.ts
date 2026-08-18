@@ -1,12 +1,4 @@
-import {
- ChangeDetectionStrategy,
- Component,
- computed,
- inject,
- input,
- output
-} from '@angular/core';
-
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import { TableData } from '../../model/table.model';
 import { SprintReportService } from '../../services/report-generation.service';
 
@@ -19,15 +11,14 @@ import { SprintReportService } from '../../services/report-generation.service';
 })
 export class ReportTable {
 
- private readonly reportService =
-  inject(SprintReportService);
+ private readonly reportService = inject(SprintReportService);
 
  // ---------------------------------------------------------------------------
  // Inputs
  // ---------------------------------------------------------------------------
 
- readonly tableData =
-  input.required<TableData[]>();
+ readonly tableData = input.required<TableData[]>();
+ readonly showSelection = input<boolean>(false)
 
  /**
   * Row IDs selected by the parent.
@@ -35,83 +26,49 @@ export class ReportTable {
   * Example:
   * ['SPR-101', 'SPR-102']
   */
- readonly selectedIds =
-  input<ReadonlySet<string>>(
-   new Set()
-  );
+ readonly selectedIds = input<ReadonlySet<string>>(new Set());
 
  // ---------------------------------------------------------------------------
  // Outputs
  // ---------------------------------------------------------------------------
 
- readonly selectedIdsChange =
-  output<Set<string>>();
+ readonly selectedIdsChange = output<Set<string>>();
 
  // ---------------------------------------------------------------------------
  // Table configuration
  // ---------------------------------------------------------------------------
 
- readonly tableColumns =
-  this.reportService.tableColumns;
+ readonly tableColumns = this.reportService.tableColumns;
 
  // ---------------------------------------------------------------------------
  // Computed state
  // ---------------------------------------------------------------------------
 
- readonly selectedCount =
-  computed(() =>
-   this.selectedIds().size
-  );
+ readonly selectedCount = computed(() => this.selectedIds().size);
 
- readonly selectedData =
-  computed(() => {
+ readonly selectedData = computed(() => {
+  const selected = this.selectedIds();
+  return this.tableData().filter(row => selected.has(row.ticketNo));
+ });
 
-   const selected =
-    this.selectedIds();
+ readonly allSelected = computed(() => {
+  const rows = this.tableData();
+  if (!rows.length) return false;
 
-   return this.tableData()
-    .filter(row =>
-     selected.has(row.ticketNo)
-    );
-  });
+  const selected = this.selectedIds();
+  return rows.every(row => selected.has(row.ticketNo));
+ });
 
- readonly allSelected =
-  computed(() => {
-
-   const rows =
-    this.tableData();
-
-   if (!rows.length) {
-    return false;
-   }
-
-   const selected =
-    this.selectedIds();
-
-   return rows.every(row =>
-    selected.has(row.ticketNo)
-   );
-  });
-
- readonly partiallySelected =
-  computed(() => {
-
-   return (
-    this.selectedCount() > 0 &&
-    !this.allSelected()
-   );
-  });
+ readonly partiallySelected = computed(() => {
+  return (this.selectedCount() > 0 && !this.allSelected());
+ });
 
  // ---------------------------------------------------------------------------
  // Selection
  // ---------------------------------------------------------------------------
 
- toggleRecord(
-  ticketNo: string
- ): void {
-
-  const next =
-   new Set(this.selectedIds());
+ toggleRecord(ticketNo: string): void {
+  const next = new Set(this.selectedIds());
 
   if (next.has(ticketNo)) {
    next.delete(ticketNo);
@@ -123,7 +80,6 @@ export class ReportTable {
  }
 
  toggleSelectAll(): void {
-
   if (this.allSelected()) {
    this.clearSelection();
    return;
@@ -133,41 +89,23 @@ export class ReportTable {
  }
 
  selectAll(): void {
-
-  const next =
-   new Set(
-    this.tableData()
-     .map(row => row.ticketNo)
-   );
-
+  const next = new Set(this.tableData().map(row => row.ticketNo));
   this.emitSelection(next);
  }
 
  clearSelection(): void {
-
-  this.emitSelection(
-   new Set()
-  );
+  this.emitSelection(new Set());
  }
 
- isSelected(
-  ticketNo: string
- ): boolean {
-
-  return this.selectedIds()
-   .has(ticketNo);
+ isSelected(ticketNo: string): boolean {
+  return this.selectedIds().has(ticketNo);
  }
 
  // ---------------------------------------------------------------------------
  // Internal
  // ---------------------------------------------------------------------------
 
- private emitSelection(
-  selection: Set<string>
- ): void {
-
-  this.selectedIdsChange.emit(
-   selection
-  );
+ private emitSelection(selection: Set<string>): void {
+  this.selectedIdsChange.emit(selection);
  }
 }

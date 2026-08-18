@@ -16,14 +16,13 @@ export class SprintReportService {
  readonly tableColumns: TableColumn<TableData>[] = TICKET_HEADERS;
 
  async generateReportData(
-  workItemsFile: File | null,
+  workItemsFiles: File[],
   itemStatusFiles: File[]
  ): Promise<{
   workItems: WorkItem[];
   tableData: TableData[];
  }> {
-
-  const workItems = await this.loadWorkItems(workItemsFile);
+  const workItems = await this.loadWorkItems(workItemsFiles);
   const itemStatusLookup = await this.loadItemStatusLookup(itemStatusFiles);
   const enrichedWorkItems = this.attachStatusTimelines(workItems, itemStatusLookup);
 
@@ -42,14 +41,24 @@ export class SprintReportService {
   return this.transformWorkItemsFn(enrichedWorkItems);
  }
 
- async loadWorkItems(workItemsFile: File | null): Promise<WorkItem[]> {
+ async loadWorkItems(workItemsFiles: File[]): Promise<WorkItem[]> {
 
-  if (!workItemsFile) {
+  if (!workItemsFiles.length) {
    return [];
   }
 
-  const data = await this.excelFileService.convertExcelToJson<ExcelWorkItem>(workItemsFile);
-  return mapExcelWorkItems(data);
+  const data = await this.excelFileService.convertMultipleExcelToJson<ExcelWorkItem>(workItemsFiles);
+
+  // Filtering Duplicates
+  const seen = new Set<string>();
+  const uniqueData = data.filter(item => {
+   const id = item['Item Id'];
+   if (!id || seen.has(id)) return false;
+   seen.add(id);
+   return true;
+  });
+
+  return mapExcelWorkItems(uniqueData);
  }
 
  async loadItemStatusLookup(
@@ -146,14 +155,13 @@ export class SprintReportService {
 
  private attachStatusTimelines(
   workItems: WorkItem[],
-  itemStatusLookup:
-   Record<string, ItemStatusTimeline[]>
+  itemStatusLookup: Record<string, ItemStatusTimeline[]>
  ): WorkItem[] {
-
-  return workItems.map(item => ({
-   ...item,
-   status_list:
-    itemStatusLookup[item.itemId] ?? []
-  }));
+  return workItems
+   .filter(item => (itemStatusLookup[item.itemId]?.length ?? 0) > 0)
+   .map(item => ({
+    ...item,
+    status_list: itemStatusLookup[item.itemId]
+   }));
  }
 }

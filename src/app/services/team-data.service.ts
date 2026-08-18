@@ -13,10 +13,11 @@ type TeamDataStore = Partial<Record<Team['id'], TeamData>>;
 @Injectable({ providedIn: 'root' })
 export class TeamDataService {
 
- private readonly STORAGE_KEY = 'team-data';
+ private readonly TEAM_DATA_KEY = 'team-data';
+ private readonly TEAM_ID_KEY = 'team-id';
 
  private readonly store = signal<TeamDataStore>(this.load());
- private readonly selectedTeamId = signal<Team['id'] | null>(null);
+ private readonly selectedTeamId = signal<Team['id'] | null>(this.loadTeamId());
 
  readonly teamId = this.selectedTeamId.asReadonly();
 
@@ -40,6 +41,7 @@ export class TeamDataService {
  });
 
  selectTeam(teamId: Team['id']): void {
+  localStorage.setItem(this.TEAM_ID_KEY, teamId)
   this.selectedTeamId.set(teamId);
  }
 
@@ -80,14 +82,14 @@ export class TeamDataService {
  }
 
  clearAll(): void {
-  localStorage.removeItem(this.STORAGE_KEY);
+  localStorage.removeItem(this.TEAM_DATA_KEY);
 
   this.store.set({});
   this.selectedTeamId.set(null);
  }
 
  private load(): TeamDataStore {
-  const stored = localStorage.getItem(this.STORAGE_KEY);
+  const stored = localStorage.getItem(this.TEAM_DATA_KEY);
 
   if (!stored) {
    return {};
@@ -101,7 +103,11 @@ export class TeamDataService {
  }
 
  private persist(store: TeamDataStore): void {
-  localStorage.setItem(this.STORAGE_KEY, JSON.stringify(store));
+  localStorage.setItem(this.TEAM_DATA_KEY, JSON.stringify(store));
   this.store.set(store);
+ }
+
+ private loadTeamId(): string | null {
+  return localStorage.getItem(this.TEAM_ID_KEY) ?? null
  }
 }
