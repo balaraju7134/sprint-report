@@ -2,11 +2,8 @@ import { TableData } from '../model/table.model';
 import { StatusNameEnum } from '../model/work-item-status.model';
 import { WorkItem } from '../model/work-item.model';
 
-const firstDate = (statusMap: Map<StatusNameEnum, string[]>, status: StatusNameEnum): string =>
- statusMap.get(status)?.[0] ?? '';
-
-const lastDate = (statusMap: Map<StatusNameEnum, string[]>, status: StatusNameEnum): string =>
- statusMap.get(status)?.at(-1) ?? '';
+const normalizeDates = (statusMap: Map<StatusNameEnum, string[]>, status: StatusNameEnum): string =>
+ (statusMap.get(status) || []).join(", ");
 
 const buildStatusMap = (statusList: WorkItem['status_list']) =>
  statusList.reduce((map, status) => {
@@ -25,7 +22,7 @@ const hasMovedBack = (statusList: WorkItem['status_list']): boolean =>
 
   const previousStatus = list[index - 1].status_name;
   return (
-   (previousStatus === StatusNameEnum.QA || previousStatus === StatusNameEnum.QA_DEPLOYMENT) &&
+   (previousStatus === StatusNameEnum.QA || previousStatus === StatusNameEnum.UAT) &&
    (status.status_name === StatusNameEnum.TODO || status.status_name === StatusNameEnum.IN_PROGRESS)
   );
  });
@@ -42,14 +39,14 @@ export function transformWorkItems(workItems: WorkItem[]): TableData[] {
    ticketType: item.itemType,
    testingStatus: item.status,
    comments: "",
-   developmentStartDate: firstDate(statusMap, StatusNameEnum.IN_PROGRESS),
+   developmentStartDate: item.startDate,
    estimatedEndDate: item.endDate,
-   actualEndDate: lastDate(statusMap, StatusNameEnum.PROD_DEPLOYMENT) || lastDate(statusMap, StatusNameEnum.COMPLETED),
-   qaDeployedDate: firstDate(statusMap, StatusNameEnum.QA),
-   qatStartDate: firstDate(statusMap, StatusNameEnum.QA),
-   uatDeployedDate: firstDate(statusMap, StatusNameEnum.UAT),
-   uatStartDate: firstDate(statusMap, StatusNameEnum.UAT),
-   prodDeployment: firstDate(statusMap, StatusNameEnum.PROD_DEPLOYMENT),
+   actualEndDate: normalizeDates(statusMap, StatusNameEnum.QA_DEPLOYMENT),
+   qaDeployedDate: normalizeDates(statusMap, StatusNameEnum.QA),
+   qatStartDate: normalizeDates(statusMap, StatusNameEnum.QA),
+   uatDeployedDate: normalizeDates(statusMap, StatusNameEnum.UAT),
+   uatStartDate: normalizeDates(statusMap, StatusNameEnum.UAT),
+   prodDeployment: normalizeDates(statusMap, StatusNameEnum.PROD_DEPLOYMENT),
    movedBackStatus: hasMovedBack(item.status_list) ? 'Yes' : 'No'
   };
  });

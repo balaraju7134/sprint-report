@@ -14,24 +14,25 @@
    <!-- Title -->
    <div class="flex min-w-0 items-center gap-3">
 
-    <div class="flex h-11 w-11 shrink-0
-                 items-center justify-center
-                 rounded-xl bg-slate-900
-                 text-sm font-bold text-white">
-     E
-    </div>
+    <!-- Home Button -->
+    <button type="button" title="Home" aria-label="Home" (click)="goHome()"
+     class="group flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-sm transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 hover:shadow">
+     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"
+      class="h-5 w-5 transition-transform duration-200 group-hover:-translate-y-0.5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 9.204-8.246a.75.75 0 0 1 1.092 0L21.75 12" />
+      <path stroke-linecap="round" stroke-linejoin="round"
+       d="M4.5 9.75V19.5a1.5 1.5 0 0 0 1.5 1.5h3.75v-6.75h4.5V21H18a1.5 1.5 0 0 0 1.5-1.5V9.75" />
+     </svg>
+    </button>
 
     <div class="min-w-0">
 
-     <h1 class="truncate text-xl font-bold
-                   tracking-tight text-slate-900">
+     <h1 class="truncate text-xl font-bold tracking-tight text-slate-900">
       Export Sprint Reports
      </h1>
 
-     <p class="mt-1 hidden text-sm
-                   text-slate-500 sm:block">
-      Choose teams and optionally select
-      individual records to export.
+     <p class="mt-1 hidden text-sm text-slate-500 sm:block">
+      Choose teams and optionally select individual records to export.
      </p>
 
     </div>
@@ -40,28 +41,10 @@
 
 
    <!-- Availability -->
-   <div class="inline-flex shrink-0
-               items-center gap-2
-               rounded-full
-               border border-slate-200
-               bg-slate-50
-               px-3 py-1.5
-               text-xs font-medium
-               text-slate-600">
-
-    <span class="h-1.5 w-1.5 rounded-full
-                 bg-emerald-500"></span>
-
-    {{ available.length }}
-
-    {{
-    available.length === 1
-    ? 'report'
-    : 'reports'
-    }}
-
-    available
-
+   <div
+    class="inline-flex shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-600">
+    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+    {{ available.length }} {{ available.length === 1 ? 'report' : 'reports' }} available
    </div>
 
   </div>
@@ -73,9 +56,7 @@
 
 <main class="min-h-0 flex-1 bg-slate-50">
 
- <div class="mx-auto flex h-full w-full
-           max-w-7xl min-h-0 flex-col
-           px-4 sm:px-6 lg:px-8">
+ <div class="mx-auto flex h-full w-full max-w-7xl min-h-0 flex-col px-4 sm:px-6 lg:px-8">
 
   @if (available.length) {
 
@@ -85,34 +66,18 @@
 
   <section class="shrink-0 py-4">
 
-   <div class="flex flex-col gap-3
-                 rounded-xl
-                 border border-slate-200
-                 bg-white
-                 px-4 py-3
-                 shadow-sm
-                 sm:flex-row
-                 sm:items-center
-                 sm:justify-between">
+   <div
+    class="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
 
     <!-- Select all -->
     <div class="flex items-center gap-3">
 
      <input type="checkbox" [checked]="allSelected" [indeterminate]="partial" (change)="toggleSelectAll()"
-      aria-label="Select all teams" class="h-4 w-4 rounded
-                     border-slate-300
-                     text-indigo-600
-                     focus:ring-indigo-500" />
+      aria-label="Select all teams" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
 
-     <button type="button" (click)="toggleSelectAll()" class="text-sm font-semibold
-                     text-slate-800
-                     transition
-                     hover:text-indigo-600">
-      {{
-      allSelected
-      ? 'All teams selected'
-      : 'Select all teams'
-      }}
+     <button type="button" (click)="toggleSelectAll()"
+      class="text-sm font-semibold text-slate-800 transition hover:text-indigo-600">
+      {{ allSelected ? 'All teams selected' : 'Select all teams' }}
      </button>
 
      <span class="text-xs text-slate-400">
@@ -125,44 +90,17 @@
     <!-- Selection summary -->
     @if (hasSelection) {
 
-    <div class="flex items-center
-                     justify-between gap-3
-                     sm:justify-end">
+    <div class="flex items-center justify-between gap-3 sm:justify-end">
 
-     <span class="rounded-lg
-                       bg-indigo-50
-                       px-3 py-1.5
-                       text-xs font-semibold
-                       text-indigo-700">
-
-      {{ teamCount }}
-      {{
-      teamCount === 1
-      ? 'team'
-      : 'teams'
-      }}
-
-      <span class="mx-1 text-indigo-300">
-       ·
-      </span>
-
-      {{ rowCount }}
-      {{
-      rowCount === 1
-      ? 'record'
-      : 'records'
-      }}
-
+     <span class="rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700">
+      {{ teamCount }} {{ teamCount === 1 ? 'team' : 'teams' }}
+      <span class="mx-1 text-indigo-300"> · </span>
+      {{ rowCount }} {{ rowCount === 1 ? 'record' : 'records' }}
      </span>
 
 
-     <button type="button" (click)="clearSelection()" class="rounded-lg
-                       px-2.5 py-1.5
-                       text-xs font-semibold
-                       text-slate-500
-                       transition
-                       hover:bg-slate-100
-                       hover:text-slate-700">
+     <button type="button" (click)="clearSelection()"
+      class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-700">
       Clear
      </button>
 
@@ -179,39 +117,21 @@
   <!-- Scrollable team list -->
   <!-- ========================================================== -->
 
-  <section class="min-h-0 flex-1
-               overflow-y-auto
-               overscroll-contain
-               pb-4">
+  <section class="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4">
 
    <div class="flex flex-col gap-4">
 
-    @for (
-    team of available;
-    track team.id
-    ) {
+    @for ( team of available; track team.id ) {
 
     @let teamData = getTeamData(team.id);
     @let rows = getRows(team.id);
-    @let teamSelected =
-    selectedTeamIds().has(team.id);
-    @let teamExpanded =
-    expandedTeamId() === team.id;
-    @let teamRows =
-    getSelectedRows(team.id);
+    @let teamSelected = selectedTeamIds().has(team.id);
+    @let teamExpanded = expandedTeamId() === team.id;
+    @let teamRows = getSelectedRows(team.id);
 
     <app-team-report-card [team]="team" [teamData]="teamData!" [tableData]="rows" [selected]="teamSelected"
-     [selectedRows]="teamRows" [expanded]="teamExpanded" (selectedChange)="
-                toggleTeam(team.id)
-              " (selectedRowsChange)="
-                updateSelectedRows(
-                  team.id,
-                  $event
-                )
-              " (expandedChange)="
-                toggleExpanded(team.id)
-              " />
-
+     [selectedRows]="teamRows" [expanded]="teamExpanded" (selectedChange)="toggleTeam(team.id)"
+     (selectedRowsChange)="updateSelectedRows(team.id,$event)" (expandedChange)="toggleExpanded(team.id)" />
     }
 
    </div>
@@ -225,78 +145,34 @@
 
   @if (hasSelection) {
 
-  <section class="shrink-0
-                 border-t
-                 border-slate-200
-                 bg-slate-50
-                 py-3">
+  <section class="shrink-0 border-t border-slate-200 bg-slate-50 py-3">
 
-   <div class="flex items-center
-                   justify-between gap-4
-                   rounded-xl
-                   border border-indigo-200
-                   bg-white
-                   px-4 py-3
-                   shadow-lg
-                   sm:px-5">
+   <div
+    class="flex items-center justify-between gap-4 rounded-xl border border-indigo-200 bg-white px-4 py-3 shadow-lg sm:px-5">
 
     <!-- Summary -->
     <div class="min-w-0">
 
-     <p class="text-sm font-semibold
-                       text-slate-900">
+     <p class="text-sm font-semibold text-slate-900">
       Ready to export
      </p>
 
-     <p class="mt-0.5 text-xs
-                       text-slate-500">
-
-      {{ teamCount }}
-
-      {{
-      teamCount === 1
-      ? 'team'
-      : 'teams'
-      }}
-
-      <span class="mx-1">
-       ·
-      </span>
-
-      {{ rowCount }}
-
-      {{
-      rowCount === 1
-      ? 'record'
-      : 'records'
-      }}
-
+     <p class="mt-0.5 text-xs text-slate-500">
+      {{ teamCount }} {{ teamCount === 1 ? 'team' : 'teams' }}
+      <span class="mx-1"> · </span>
+      {{ rowCount }} {{ rowCount === 1 ? 'record' : 'records' }}
      </p>
 
     </div>
 
 
     <!-- Export button -->
-    <button type="button" (click)="export()" class="inline-flex shrink-0
-                     items-center justify-center
-                     gap-2 rounded-lg
-                     bg-indigo-600
-                     px-4 py-2.5
-                     text-sm font-semibold
-                     text-white shadow-sm
-                     transition
-                     hover:bg-indigo-700
-                     focus:outline-none
-                     focus:ring-2
-                     focus:ring-indigo-500
-                     focus:ring-offset-2">
-
+    <button type="button" (click)="export()"
+     class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" />
      </svg>
-
      Export Excel
-
     </button>
 
    </div>
@@ -311,43 +187,23 @@
   <!-- Empty -->
   <!-- ========================================================== -->
 
-  <div class="flex flex-1
-               items-center
-               justify-center">
+  <div class="flex flex-1 items-center justify-center">
 
-   <section class="w-full max-w-md
-                 rounded-xl
-                 border border-dashed
-                 border-slate-300
-                 bg-white
-                 px-6 py-12
-                 text-center">
+   <section class="w-full max-w-md rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
 
-    <div class="mx-auto flex h-12 w-12
-                   items-center justify-center
-                   rounded-full
-                   bg-slate-100
-                   text-slate-500">
-
+    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
      <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
        d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a2 2 0 011.414.586l4.414 4.414A2 2 0 0119 11.414V19a2 2 0 01-2 2H7a2 2 0 01-2-2z" />
      </svg>
-
     </div>
 
-    <h2 class="mt-4 text-sm
-                   font-semibold
-                   text-slate-900">
+    <h2 class="mt-4 text-sm font-semibold text-slate-900">
      No reports available
     </h2>
 
-    <p class="mx-auto mt-1
-                   max-w-md
-                   text-sm
-                   text-slate-500">
-     Generate a sprint report for
-     at least one team before exporting.
+    <p class="mx-auto mt-1 max-w-md text-sm text-slate-500">
+     Generate a sprint report for at least one team before exporting.
     </p>
 
    </section>

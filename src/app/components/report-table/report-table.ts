@@ -18,6 +18,7 @@ export class ReportTable {
  // ---------------------------------------------------------------------------
 
  readonly tableData = input.required<TableData[]>();
+ readonly tableTitle = input<string>("")
  readonly showSelection = input<boolean>(false)
 
  /**

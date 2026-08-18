@@ -1,58 +1,31 @@
-import {
- ChangeDetectionStrategy,
- Component,
- computed,
- inject,
- signal
-} from '@angular/core';
-
-import {
- TEAM_LIST,
- Team
-} from '../../constants/team-list.constants';
-
-import {
- TableData
-} from '../../model/table.model';
-
-import {
- TeamDataService
-} from '../../services/team-data.service';
-
-import {
- SprintReportService
-} from '../../services/report-generation.service';
-
-import {
- TeamReportCard
-} from '../team-report-card/team-report-card';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { TEAM_LIST, Team } from '../../constants/team-list.constants';
+import { TableData } from '../../model/table.model';
+import { TeamDataService } from '../../services/team-data.service';
+import { SprintReportService } from '../../services/report-generation.service';
+import { TeamReportCard } from '../team-report-card/team-report-card';
+import { ROUTES } from '../../constants/route.constants';
+import { Router } from '@angular/router';
 
 @Component({
  selector: 'app-export-report',
  standalone: true,
- imports: [
-  TeamReportCard
- ],
+ imports: [TeamReportCard],
  templateUrl: './export-report.html',
  changeDetection: ChangeDetectionStrategy.OnPush,
- host: {
-  class: 'flex h-dvh flex-col overflow-hidden'
- }
+ host: { class: 'flex h-dvh flex-col overflow-hidden' }
 })
 export class ExportReport {
 
- private readonly teamDataService =
-  inject(TeamDataService);
-
- private readonly reportService =
-  inject(SprintReportService);
+ private readonly teamDataService = inject(TeamDataService);
+ private readonly reportService = inject(SprintReportService);
+ private readonly router = inject(Router);
 
  // ---------------------------------------------------------------------------
  // Data
  // ---------------------------------------------------------------------------
 
  readonly teams = TEAM_LIST;
-
  readonly availableTeams = computed(() => this.teams.filter(team => this.teamDataService.has(team.id)));
 
  // ---------------------------------------------------------------------------
@@ -240,6 +213,10 @@ export class ExportReport {
    * export only selected rows.
    */
   return rows.filter(row => selected.has(row.ticketNo));
+ }
+
+ goHome(): void {
+  this.router.navigate([`/${ROUTES.HOME}`])
  }
 }
 

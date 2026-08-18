@@ -3,6 +3,8 @@ import { ReportTable } from '../report-table/report-table';
 import { SprintReportService } from '../../services/report-generation.service';
 import { TeamDataService } from '../../services/team-data.service';
 import { WorkItem } from '../../model/work-item.model';
+import { Router } from '@angular/router';
+import { ROUTES } from '../../constants/route.constants';
 
 @Component({
  selector: 'app-team-wise-report',
@@ -13,6 +15,7 @@ export class TeamWiseReport {
 
  private readonly sprintReportService = inject(SprintReportService);
  private readonly teamDataService = inject(TeamDataService);
+ private readonly router = inject(Router)
 
  // ---------------------------------------------------------------------------
  // Team / report data
@@ -34,30 +37,6 @@ export class TeamWiseReport {
  readonly isGenerating = signal(false);
  readonly errorMessage = signal<string | null>(null);
 
- // ---------------------------------------------------------------------------
- // Row selection
- // ---------------------------------------------------------------------------
-
- /**
-  * Selected ticket numbers from ReportTable.
-  *
-  * This is the source of truth for row selection.
-  */
- readonly selectedIds = signal<ReadonlySet<string>>(new Set());
-
- /**
-  * Number of selected rows.
-  */
- readonly selectedCount = computed(() => this.selectedIds().size);
-
- /**
-  * Actual selected table rows.
-  */
- readonly selectedRows = computed(() => {
-  const selected = this.selectedIds();
-  return this.tableData().filter(row => selected.has(row.ticketNo));
- });
-
  readonly disableGenerateButton = computed(() => {
   return !this.workItemsFiles().length || !this.itemStatusFiles().length || this.isGenerating()
  })
@@ -78,32 +57,6 @@ export class TeamWiseReport {
  }
 
  // ---------------------------------------------------------------------------
- // Row selection
- // ---------------------------------------------------------------------------
-
- /**
-  * Receives selection from ReportTable.
-  */
- onRowsSelected(
-  ids: Set<string>
- ): void {
-
-  this.selectedIds.set(
-   new Set(ids)
-  );
- }
-
- /**
-  * Clear selection when a new report is generated.
-  */
- private clearRowSelection(): void {
-
-  this.selectedIds.set(
-   new Set()
-  );
- }
-
- // ---------------------------------------------------------------------------
  // Report generation
  // ---------------------------------------------------------------------------
 
@@ -118,9 +71,6 @@ export class TeamWiseReport {
 
   this.isGenerating.set(true);
   this.errorMessage.set(null);
-
-  // New report = new row selection.
-  this.clearRowSelection();
 
   try {
    const { workItems, tableData } = await this.sprintReportService.generateReportData(workItemsFiles, statusFiles);
@@ -139,20 +89,7 @@ export class TeamWiseReport {
   }
  }
 
- // ---------------------------------------------------------------------------
- // Excel export
- // ---------------------------------------------------------------------------
-
- exportToExcel(): void {
-
-  const selected =
-   this.selectedRows();
-
-  if (!selected.length) {
-   return;
-  }
-
-  this.sprintReportService
-   .exportToExcel(selected);
+ goHome(): void {
+  this.router.navigate([`/${ROUTES.HOME}`])
  }
 }

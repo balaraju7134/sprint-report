@@ -1,19 +1,22 @@
 <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
 
  <!-- Table header -->
+ @if (tableTitle()) {
  <div class="flex flex-col gap-3 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
 
   <div class="min-w-0">
    <div class="flex items-center gap-2">
-    <h2 class="text-sm font-semibold text-slate-900"> Sprint records </h2>
+    <h2 class="text-sm font-semibold text-slate-900"> {{tableTitle()}} </h2>
     <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
      {{ tableData().length }}
     </span>
    </div>
 
+   @if (showSelection()) {
    <p class="mt-0.5 text-xs text-slate-500">
     Select the records you want to include in the export.
    </p>
+   }
   </div>
 
 
@@ -33,6 +36,7 @@
   }
 
  </div>
+ }
 
 
  <!-- Table -->

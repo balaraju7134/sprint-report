@@ -1,26 +1,44 @@
 <!-- Page Header -->
 <header class="border-b border-slate-200 bg-white">
- <div class="mx-auto max-w-7xl px-6 py-6">
+ <div class="mx-auto max-w-7xl px-6 py-5">
   <div class="flex items-center justify-between">
 
-   <div>
-    <div class="flex items-center gap-2">
-     <h1 class="text-2xl font-bold tracking-tight text-slate-900">
-      Sprint Report
-     </h1>
+   <!-- Left -->
+   <div class="flex items-center gap-4">
 
-     @if (team(); as selectedTeam) {
-     <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-      {{ selectedTeam.name }}
-     </span>
-     }
+    <!-- Home Button -->
+    <button type="button" title="Home" aria-label="Home" (click)="goHome()"
+     class="group flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-sm transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 hover:shadow">
+     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"
+      class="h-5 w-5 transition-transform duration-200 group-hover:-translate-y-0.5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 9.204-8.246a.75.75 0 0 1 1.092 0L21.75 12" />
+      <path stroke-linecap="round" stroke-linejoin="round"
+       d="M4.5 9.75V19.5a1.5 1.5 0 0 0 1.5 1.5h3.75v-6.75h4.5V21H18a1.5 1.5 0 0 0 1.5-1.5V9.75" />
+     </svg>
+    </button>
+
+    <!-- Title -->
+    <div>
+     <div class="flex items-center gap-2">
+      <h1 class="text-2xl font-bold tracking-tight text-slate-900">
+       Sprint Report
+      </h1>
+
+      @if (team(); as selectedTeam) {
+      <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+       {{ selectedTeam.name }}
+      </span>
+      }
+     </div>
+
+     <p class="mt-1 text-sm text-slate-500">
+      Upload your sprint files and generate a consolidated report.
+     </p>
     </div>
 
-    <p class="mt-1 text-sm text-slate-500">
-     Upload your sprint files and generate a consolidated report.
-    </p>
    </div>
 
+   <!-- Right -->
    @if (hasData()) {
    <div class="hidden items-center gap-2 rounded-full bg-green-50 px-4 py-2 text-sm font-medium text-green-700 sm:flex">
     <span class="h-2 w-2 rounded-full bg-green-500"></span>
@@ -301,8 +319,7 @@
  <!-- ========================= -->
 
  @if (tableData().length) {
- <app-report-table [tableData]="tableData()" [selectedIds]="selectedIds()"
-  (selectedIdsChange)="onRowsSelected($event)" />
+ <app-report-table [tableData]="tableData()" />
  }
 
 </main>

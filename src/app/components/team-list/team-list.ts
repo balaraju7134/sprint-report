@@ -63,7 +63,8 @@ export class TeamList {
  }
 
  clearTeam(teamId: Team['id']): void {
-  this.teamDataService.clear(teamId);
+  const status = confirm("Do you want to clear the data ?")
+  if (status) this.teamDataService.clear(teamId);
  }
 
  hasData(teamId: Team['id']): boolean {
